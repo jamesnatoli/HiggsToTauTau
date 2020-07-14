@@ -78,6 +78,7 @@ def BuildPlot(args):
     # loop through histograms to read and store to dict
     for hkey in variable.GetListOfKeys():
         hname = hkey.GetName()
+        print hname
         ihist = variable.Get(hname).Clone()
         if hname in plot_tools.boost_style_map['backgrounds']:
             ihist = plot_tools.ApplyStyle(ihist, plot_tools.boost_style_map['backgrounds'][hname])

@@ -12,8 +12,10 @@ def parse_tree_name(keys):
         return 'et_tree'
     elif 'mt_tree;1' in keys:
         return 'mt_tree'
+    elif 'tt_tree;1' in keys:
+        return 'tt_tree'
     else:
-        raise Exception('Can\t find et_tree or mt_tree in keys: {}'.format(keys))
+        raise Exception('Can\t find et_tree, mt_tree, or tt_tree in keys: {}'.format(keys))
 
 
 def categorize(events):
