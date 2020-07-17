@@ -12,12 +12,18 @@ def clean_samples(input_histos):
         'ZL': input_histos['ZL'].Clone(),
         'jetFakes': input_histos['jetFakes'].Clone(),
         'tt': input_histos['TTL'].Clone(),
+        # embedded and ZTT are the same thing, i think
+        'embedded': input_histos['embedded'].Clone(),
         'Others': input_histos['STL'].Clone()
     }
 
     # merged['tt'].Add(input_histos['TTL'])
+    
     for name in ['VVL']:
         merged['Others'].Add(input_histos[name])
+
+    for name in plot_tools.ac_style_map['jetFakes']:
+        merged['jetFakes'].Add(input_histos[name])
 
     return merged
 
@@ -46,6 +52,7 @@ def fillLegend(data, backgrounds, signals, stat):
 
     # backgrounds
     # leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
+    leg.AddEntry(backgrounds['embedded'], 'Embedded', 'f')
     leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
     leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
     leg.AddEntry(backgrounds['tt'], 'tt', 'f')
@@ -55,7 +62,6 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(stat, 'Uncertainty', 'f')
 
     return leg
-
 
 def BuildPlot(args):
     """
@@ -78,6 +84,11 @@ def BuildPlot(args):
 
     # start getting histograms
     data_hist = variable.Get('data_obs').Clone()
+    # Get the other datas... jk don't
+    # for key in category.GetListOfKeys():
+    #     hname = key.GetName()
+    #     if 'nominal' in key.GetName():
+    #         data_hist.Add(category.Get(hname).Clone())
     signals = {}
     backgrounds = {}
 
@@ -91,6 +102,9 @@ def BuildPlot(args):
         elif hname in plot_tools.ac_style_map['signals']:
             ihist = plot_tools.ApplyStyle(ihist, plot_tools.ac_style_map['signals'][hname])
             signals[hname] = ihist
+        elif hname in plot_tools.ac_style_map['jetFakes']:
+            ihist = plot_tools.ApplyStyle(ihist, plot_tools.ac_style_map['jetFakes'][hname])
+            backgrounds[hname] = ihist
 
     # merge backgrounds
     backgrounds = clean_samples(backgrounds)
@@ -99,6 +113,9 @@ def BuildPlot(args):
     stat = data_hist.Clone()  # sum of all backgrounds
     stat.Reset()
     stack = ROOT.THStack()  # stack of all backgrounds
+    # This is a very cool line, sorted is able to apply a function to each element when sorting
+    # Lambda is a keyword to define an anonymous function
+    # This ensures the tallest ones are in the back
     for bkg in sorted(backgrounds.itervalues(), key=lambda hist: hist.Integral()):
         stat.Add(bkg)
         stack.Add(bkg)
@@ -205,7 +222,7 @@ def BuildPlot(args):
     line2.Draw()
 
     # save the pdf
-    can.SaveAs('Output/plots/{}_{}_{}_{}_other.pdf'.format(args.prefix, args.variable, args.category, args.year))
+    can.SaveAs('Output/plots/{}_{}_{}_{}.pdf'.format(args.prefix, args.variable, args.category, args.year))
 
 
 if __name__ == "__main__":
