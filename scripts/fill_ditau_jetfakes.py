@@ -94,7 +94,8 @@ def main(args):
 
     pool.close()
     pool.join()
-    fout.Close()
+    # Comment this out?
+    # fout.Close()
 
     call('ahadd.py {0}/jetFakes.root {0}/jetFakes_*.root'.format(output_dir), shell=True)
     call('mv -v {}/jetFakes.root {}'.format(output_dir, args.input), shell=True)

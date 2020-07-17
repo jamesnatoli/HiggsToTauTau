@@ -204,8 +204,10 @@ int main(int argc, char *argv[]) {
 	progress++;
       }
 
+      /*
       if (i%1000 == 0)
 	std::cout << "Event Number " << i << std::endl;
+      */
 
       // find the event weight (not lumi*xs if looking at W or Drell-Yan)
       Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
@@ -246,28 +248,35 @@ int main(int argc, char *argv[]) {
       auto ltau = taus.tau_at(0);
       auto stau = taus.tau_at(1);
 
+      // First Cut on pT
+      if (ltau.getPt() > 40 || stau.getPt() > 40) {
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2, 1.);
+      } else {
+	continue;
+      }
+
       // First tau ID selection
       if (ltau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5) { 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2, 1.);
+       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 3, 1.);
       } else {
        	continue;
       }
 
       if (ltau.getAgainstElectronDeepWP(wps::deep_vloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 3, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
       } else {
        	continue;
       }
 
       // Second tau ID selection
       if (stau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5) { 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
+       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
       } else {
        	continue;
       }
 
       if (stau.getAgainstElectronDeepWP(wps::deep_vloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
       } else {
        	continue;
       }
@@ -275,7 +284,7 @@ int main(int argc, char *argv[]) {
       // only opposite-sign
       int evt_charge = ltau.getCharge() + stau.getCharge();
       if (evt_charge == 0) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
       } else {
 	continue;
       }
@@ -302,7 +311,7 @@ int main(int argc, char *argv[]) {
       
       // only keep the regions we need
       if (signalRegion || antiTauIsoRegion) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8, 1.);
       } else {
 	continue;
       }
