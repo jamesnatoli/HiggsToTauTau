@@ -8,15 +8,18 @@ ROOT.gStyle.SetOptStat(0)
 
 def clean_samples(input_histos):
     merged = {
+        # Use embedded, not ZTT WRONGO
         'ZTT': input_histos['ZTT'].Clone(),
         'ZL': input_histos['ZL'].Clone(),
         'jetFakes': input_histos['jetFakes'].Clone(),
         'tt': input_histos['TTT'].Clone(),
+        # 'embedded': input_histos['embedded'].Clone(),
         'Others': input_histos['STT'].Clone()
     }
 
-    merged['tt'].Add(input_histos['TTL'])
-    for name in ['STL', 'VVT', 'VVL']:
+    # merged['tt'].Add(input_histos['TTL'])
+    # for name in ['STL', 'VVT', 'VVL']:
+    for name in ['VVL']:
         merged['Others'].Add(input_histos[name])
 
     return merged
@@ -45,7 +48,8 @@ def fillLegend(data, backgrounds, signals, stat):
     # leg.AddEntry(signals['reweighted_qqH_htt_0M125'], 'VBF PS Higgs(125)x50', 'l')
 
     # backgrounds
-    leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
+    # leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
+    leg.AddEntry(backgrounds['embedded'], 'Embedded', 'f')
     leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
     leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
     leg.AddEntry(backgrounds['tt'], 'tt', 'f')
@@ -84,6 +88,7 @@ def BuildPlot(args):
         hname = hkey.GetName()
         ihist = variable.Get(hname).Clone()
         if hname in plot_tools.ac_style_map['backgrounds']:
+            # print 'Adding... ' + hname
             ihist = plot_tools.ApplyStyle(ihist, plot_tools.ac_style_map['backgrounds'][hname])
             backgrounds[hname] = ihist
         elif hname in plot_tools.ac_style_map['signals']:

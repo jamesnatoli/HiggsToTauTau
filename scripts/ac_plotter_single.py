@@ -11,15 +11,12 @@ def clean_samples(input_histos):
         # 'ZTT': input_histos['ZTT'].Clone(),
         'ZL': input_histos['ZL'].Clone(),
         'jetFakes': input_histos['jetFakes'].Clone(),
-        'tt': input_histos['TTL'].Clone(),
-        # embedded and ZTT are the same thing, i think
+        # 'tt': input_histos['TTL'].Clone(),
+        # Embedded and ZTT are obviously not the same thing, you big dumb dumb
         'embedded': input_histos['embedded'].Clone(),
         'Others': input_histos['STL'].Clone()
     }
-
-    # merged['tt'].Add(input_histos['TTL'])
-    
-    for name in ['VVL']:
+    for name in ['VVL', 'TTL']:
         merged['Others'].Add(input_histos[name])
 
     for name in plot_tools.ac_style_map['jetFakes']:
@@ -55,7 +52,6 @@ def fillLegend(data, backgrounds, signals, stat):
     leg.AddEntry(backgrounds['embedded'], 'Embedded', 'f')
     leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
     leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
-    leg.AddEntry(backgrounds['tt'], 'tt', 'f')
     leg.AddEntry(backgrounds['Others'], 'Others', 'f')
 
     # stat. uncertainty

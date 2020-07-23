@@ -206,6 +206,7 @@ def main(args):
                 name = 'data_obs'
 
             # handle MC vs embedded name
+            # Why do we do this? 
             if 'embed' in ifile:
                 name = name.replace('embed', 'ZTT')
 

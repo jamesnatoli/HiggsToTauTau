@@ -25,12 +25,29 @@ ac_style_map = {
     },
     "signals": {
         "ggh125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
+        "ggH125": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "reweighted_ggH_htt_0PM125": style_map_tuple(no_color, GetColor("#0000FF"), 1, 3, 1),
         "reweighted_ggH_htt_0M125": style_map_tuple(no_color, GetColor("#00AAFF"), 1, 3, 1),
 
         "vbf125_powheg": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
+        "VBF125": style_map_tuple(no_color, no_color, 0, 0, 1),  # don't show powheg
         "reweighted_qqH_htt_0PM125": style_map_tuple(no_color, GetColor("#FF0000"), 1, 3, 1),
         "reweighted_qqH_htt_0M125": style_map_tuple(no_color, GetColor("#ff5e00"), 1, 3, 1),
+    },
+    "jetFakes": {
+        "jetFakes_STL": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_TTL": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_VBF125": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_VVL": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_WH125": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_WH_hww125": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_ZH125": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_ZH_hww125": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_ZL": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_embedded": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_ggH125": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_ggH_hww125": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
+        "jetFakes_qqH_hww125": style_map_tuple(GetColor("#9feff2"), black, 1, 1, 1),
     }
 }
 boost_style_map = {

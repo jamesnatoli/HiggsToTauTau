@@ -249,37 +249,37 @@ int main(int argc, char *argv[]) {
       auto stau = taus.tau_at(1);
 
       // First Cut on pT
-      if (ltau.getPt() > 40 || stau.getPt() > 40) {
+      if (ltau.getPt() > 40 && stau.getPt() > 40) {
 	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2, 1.);
       } else {
 	continue;
       }
 
       // First tau ID selection
-      if (ltau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5) { 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 3, 1.);
+      if (ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 3, 1.);
       } else {
        	continue;
       }
 
-      if (ltau.getAgainstElectronDeepWP(wps::deep_vloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
+      if (ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) { 
+       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
       } else {
        	continue;
       }
 
       // Second tau ID selection
-      if (stau.getAgainstMuonDeepWP(wps::deep_vvvloose) > 0.5) { 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
+      if (stau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
       } else {
        	continue;
       }
 
-      if (stau.getAgainstElectronDeepWP(wps::deep_vloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
+      if (stau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) { 
+       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
       } else {
        	continue;
-      }
+      }      
 
       // only opposite-sign
       int evt_charge = ltau.getCharge() + stau.getCharge();
