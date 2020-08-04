@@ -204,11 +204,6 @@ int main(int argc, char *argv[]) {
 	progress++;
       }
 
-      /*
-      if (i%1000 == 0)
-	std::cout << "Event Number " << i << std::endl;
-      */
-
       // find the event weight (not lumi*xs if looking at W or Drell-Yan)
       Float_t evtwt(norm), corrections(1.), sf_trig(1.), sf_id(1.), sf_iso(1.), sf_reco(1.);
       if (name == "W") {
@@ -238,7 +233,7 @@ int main(int argc, char *argv[]) {
 	  evtwt = 3.867;
 	}
       }
-      helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 1, 1.);
+      helper->create_and_fill("cutflow", {9, 0.5, 9.5}, 1, 1.);
 
       // run factories
       taus.run_factory();
@@ -248,35 +243,50 @@ int main(int argc, char *argv[]) {
       auto ltau = taus.tau_at(0);
       auto stau = taus.tau_at(1);
 
+      // Separate processes
+      if ((name == "ZL" || name == "TTL" || name == "VVL" || name == "STL") 
+	  && ltau.getGenMatch() < 6 && stau.getGenMatch() < 6
+	  && !(ltau.getGenMatch() == 5 && stau.getGenMatch() == 5)) {
+	continue;
+      } else if ((name == "ZTT" || name == "TTT" || name == "VVT" || name == "STT") 
+		 && ltau.getGenMatch() == 5 && stau.getGenMatch() == 5) {
+	continue;
+      } else if ((name == "ZJ" || name == "TTJ" || name == "VVJ" || name == "STJ") 
+		 && ltau.getGenMatch() == 6 && stau.getGenMatch() == 6) {
+	continue;
+      } else {
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2, 1.);
+      }
+
       // First Cut on pT
       if (ltau.getPt() > 40 && stau.getPt() > 40) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 2, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 3, 1.);
       } else {
 	continue;
       }
 
       // First tau ID selection
       if (ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 3, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
       } else {
        	continue;
       }
 
       if (ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) { 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
+       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
       } else {
        	continue;
       }
 
       // Second tau ID selection
       if (stau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
       } else {
        	continue;
       }
 
       if (stau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) { 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
+       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
       } else {
        	continue;
       }      
@@ -284,7 +294,7 @@ int main(int argc, char *argv[]) {
       // only opposite-sign
       int evt_charge = ltau.getCharge() + stau.getCharge();
       if (evt_charge == 0) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8, 1.);
       } else {
 	continue;
       }
@@ -311,7 +321,7 @@ int main(int argc, char *argv[]) {
       
       // only keep the regions we need
       if (signalRegion || antiTauIsoRegion) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 9, 1.);
       } else {
 	continue;
       }
@@ -335,6 +345,15 @@ int main(int argc, char *argv[]) {
             htt_sf->var("t_phi")->setVal(ltau.getPhi());
             htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
             // trigger sf applied here ...
+	    evtwt *= htt_sf->function("t_trg_mediumDeepTau_ditau_ratio")->getVal();
+
+	    // trigger scale factors
+            htt_sf->var("t_pt")->setVal(stau.getPt());
+            htt_sf->var("t_eta")->setVal(stau.getEta());
+            htt_sf->var("t_phi")->setVal(stau.getPhi());
+            htt_sf->var("t_dm")->setVal(stau.getDecayMode());
+	    // trigger sf applied again here ...
+	    evtwt *= htt_sf->function("t_trg_mediumDeepTau_ditau_ratio")->getVal();
 
             // top-pT Reweighting
             if (name == "TTT" || name == "TTJ" || name == "TTL" || name == "STT" || name == "STJ" || name == "STL") {
@@ -378,6 +397,15 @@ int main(int argc, char *argv[]) {
             htt_sf->var("t_phi")->setVal(ltau.getPhi());
             htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
             // trigger sf applied here ...
+	    evtwt *= htt_sf->function("t_trg_mediumDeepTau_ditau_embed_ratio")->getVal();
+
+	    // trigger scale factors
+            htt_sf->var("t_pt")->setVal(stau.getPt());
+            htt_sf->var("t_eta")->setVal(stau.getEta());
+            htt_sf->var("t_phi")->setVal(stau.getPhi());
+            htt_sf->var("t_dm")->setVal(stau.getDecayMode());
+	    // trigger sf applied again here ...
+	    evtwt *= htt_sf->function("t_trg_mediumDeepTau_ditau_embed_ratio")->getVal();
 
             // embedded scale factors
             htt_sf->var("gt1_pt")->setVal(ltau.getGenPt());

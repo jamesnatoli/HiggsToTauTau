@@ -8,22 +8,19 @@ ROOT.gStyle.SetOptStat(0)
 
 def clean_samples(input_histos):
     merged = {
-        # Use embedded, not ZTT WRONGO
+        # Embedded and ZTT are obviously not the same thing, you big dumb dumb
+        # The file is called ZTT always though *shrug*
         'ZTT': input_histos['ZTT'].Clone(),
+        # 'embedded': input_histos['embedded'].Clone(),
         'ZL': input_histos['ZL'].Clone(),
         'jetFakes': input_histos['jetFakes'].Clone(),
-        'tt': input_histos['TTT'].Clone(),
-        # 'embedded': input_histos['embedded'].Clone(),
-        'Others': input_histos['STT'].Clone()
+        # 'tt': input_histos['TTL'].Clone(),
+        'Others': input_histos['STL'].Clone()
     }
-
-    # merged['tt'].Add(input_histos['TTL'])
-    # for name in ['STL', 'VVT', 'VVL']:
-    for name in ['VVL']:
+    for name in ['VVL', 'TTL']:
         merged['Others'].Add(input_histos[name])
 
     return merged
-
 
 def fillLegend(data, backgrounds, signals, stat):
     """Fill the legend with appropriate processes."""
@@ -49,10 +46,11 @@ def fillLegend(data, backgrounds, signals, stat):
 
     # backgrounds
     # leg.AddEntry(backgrounds['ZTT'], 'ZTT', 'f')
-    leg.AddEntry(backgrounds['embedded'], 'Embedded', 'f')
+    # I'm sneaky
+    leg.AddEntry(backgrounds['ZTT'], 'Embedded', 'f')
     leg.AddEntry(backgrounds['ZL'], 'ZL', 'f')
     leg.AddEntry(backgrounds['jetFakes'], 'Jet Mis-ID', 'f')
-    leg.AddEntry(backgrounds['tt'], 'tt', 'f')
+    # leg.AddEntry(backgrounds['tt'], 'tt', 'f')
     leg.AddEntry(backgrounds['Others'], 'Others', 'f')
 
     # stat. uncertainty

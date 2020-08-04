@@ -44,6 +44,8 @@ def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fa
 
     anti_events['fake_weight'] = anti_events[filling_variables].apply(
         lambda x: get_weight(x, ff_weighter), axis=1).values
+    # By setting the weights to zero, we are essentially "subtracting" them
+    # These are backgrounds with real taus
     if sample != 'data_obs':
         anti_events['fake_weight'] *= -1
 
