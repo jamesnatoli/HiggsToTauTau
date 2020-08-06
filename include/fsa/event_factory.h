@@ -60,6 +60,7 @@ class event_factory {
 
     // general interface
     ULong64_t getEvt() { return evt; }
+    UInt_t getConvEvt() { return convert_evt; }
     UInt_t getRun() { return run; }
     UInt_t getLumi() { return lumi; }
     Float_t getGenWeight() { return genweight; }
@@ -187,6 +188,7 @@ event_factory::event_factory(TTree* input, Bool_t _is_data, lepton _lep, int _er
     input->SetBranchAddress("ME_bkg1", &ME_bkg1);
     input->SetBranchAddress("ME_bkg2", &ME_bkg2);
     input->SetBranchAddress("evt", &evt);
+    input->SetBranchAddress("evt", &convert_evt);
     input->SetBranchAddress("run", &run);
     input->SetBranchAddress("lumi", &lumi);
     input->SetBranchAddress("genM", &genM);
@@ -196,8 +198,8 @@ event_factory::event_factory(TTree* input, Bool_t _is_data, lepton _lep, int _er
     if (lep == lepton::DITAU) {
       input->SetBranchAddress("nTruePU", &npu);
       input->SetBranchAddress("GenWeight", &genweight);
-      input->SetBranchAddress("prefiring_weight_up", &prefiring_weight_up);
-      input->SetBranchAddress("prefiring_weight_down", &prefiring_weight_down);
+      input->SetBranchAddress("prefiring_weight_Up", &prefiring_weight_up);
+      input->SetBranchAddress("prefiring_weight_Down", &prefiring_weight_down);
     } else if (lep == lepton::ELECTRON || lep == lepton::MUON || lep == lepton::EMU) {
       input->SetBranchAddress("npu", &npu);
       input->SetBranchAddress("genweight", &genweight);

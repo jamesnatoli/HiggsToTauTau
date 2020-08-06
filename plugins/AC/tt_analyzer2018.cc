@@ -199,9 +199,18 @@ int main(int argc, char *argv[]) {
 
     // begin the event loop
     Int_t nevts = ntuple->GetEntries();
+    std::cout << "There are " << nevts << " events" << std::endl;
     int progress(0), fraction((nevts - 1) / 10);
-    for (Int_t i = 0; i < nevts; i++) {
+    for (Int_t i = 0; i < 10; i++) {
       ntuple->GetEntry(i);
+      if (i%1000 == 0)
+	std::cout << "Processing " << i << std::endl;
+      std::cout << "event # = " << event.getConvEvt() << std::endl;
+      if (event.getConvEvt() == 40243180 || event.getConvEvt() == 39834344)
+	std::cout << "Found it!" << std::endl;
+      else
+	continue;
+      std::cout << "SHOULDN'T BE HERE" << std::endl;
       if (i == progress * fraction) {
 	running_log << "LOG: Processing: " << progress * 10 << "% complete." << std::endl;
 	progress++;
@@ -236,7 +245,8 @@ int main(int argc, char *argv[]) {
 	  evtwt = 3.867;
 	}
       }
-      helper->create_and_fill("cutflow", {9, 0.5, 9.5}, 1, 1.);
+      helper->create_and_fill("cutflow", {11, 0.5, 11.5}, 1, 1.);
+      std::cout << "Original Event Weight ==> " << evtwt << std::endl;
 
       // run factories
       taus.run_factory();
@@ -268,28 +278,42 @@ int main(int argc, char *argv[]) {
 	continue;
       }
 
+      // Cut on Eta
+      if (fabs(ltau.getEta()) < 2.1 || fabs(stau.getEta()) < 2.1) {
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
+      } else {
+	continue;
+      }
+
+      // Delta R Cut
+      if (ltau.getP4().DeltaR(stau.getP4()) > 0.5) {
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
+      } else {
+	continue;
+      }
+
       // First tau ID selection
       if (ltau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 4, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
       } else {
        	continue;
       }
 
       if (ltau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) { 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 5, 1.);
+       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
       } else {
        	continue;
       }
 
       // Second tau ID selection
       if (stau.getAgainstElectronDeepWP(wps::deep_vvvloose) > 0.5) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 6, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8, 1.);
       } else {
        	continue;
       }
 
       if (stau.getAgainstMuonDeepWP(wps::deep_vloose) > 0.5) { 
-       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 7, 1.);
+       	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 9, 1.);
       } else {
        	continue;
       }      
@@ -297,7 +321,7 @@ int main(int argc, char *argv[]) {
       // only opposite-sign
       int evt_charge = ltau.getCharge() + stau.getCharge();
       if (evt_charge == 0) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 8, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 1, 1.);
       } else {
 	continue;
       }
@@ -324,25 +348,31 @@ int main(int argc, char *argv[]) {
       
       // only keep the regions we need
       if (signalRegion || antiTauIsoRegion) {
-	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 9, 1.);
+	helper->create_and_fill("cutflow", {8, 0.5, 8.5}, 11, 1.);
       } else {
 	continue;
       }
 
       if (!isData && !isEmbed) {
 	// Pileup reweighting
-	evtwt *= lumi_weights->weight(event.getNPU());
+	std::cout << "Evtwt = " << evtwt << std::endl;
+	evtwt *= lumi_weights->weight(event.getNPU()); 
+	std::cout << "weightLumi ==> " << lumi_weights->weight(event.getNPU()) << " and evtwt now " << evtwt << std::endl;
 	
 	// lead tau id
 	htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
 	if (ltau.getDecayMode() == 5) {
+	  std::cout << "Evtwt = " << evtwt << std::endl;
 	  evtwt *= htt_sf->function("t_deeptauid_dm_medium")->getVal();
+	  std::cout << "deeptauid_med ltau ==> " << htt_sf->function("t_deeptauid_dm_medium")->getVal() << " and evtwt now " << evtwt << std::endl;
 	}
 	
 	// sublead tau id
 	htt_sf->var("t_dm")->setVal(stau.getDecayMode());
 	if (stau.getDecayMode() == 5) {
+	  std::cout << "Evtwt = " << evtwt << std::endl;
 	  evtwt *= htt_sf->function("t_deeptauid_dm_medium")->getVal();
+	  std::cout << "deeptauid_med stau ==> " << htt_sf->function("t_deeptauid_dm_medium")->getVal() << " and evtwt now " << std::endl;
 	}
 	
 	// trigger scale factors
@@ -351,7 +381,9 @@ int main(int argc, char *argv[]) {
 	htt_sf->var("t_phi")->setVal(ltau.getPhi());
 	htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
 	// trigger sf applied here ...
+	std::cout << "Evtwt = " << evtwt << std::endl;
 	evtwt *= htt_sf->function("t_trg_mediumDeepTau_ditau_ratio")->getVal();
+	std::cout << "trigger ratio ltau ==> " << htt_sf->function("t_trg_mediumDeepTau_ditau_ratio")->getVal() << " and evtwt now " << std::endl;
 	
 	// trigger scale factors
 	htt_sf->var("t_pt")->setVal(stau.getPt());
@@ -359,18 +391,24 @@ int main(int argc, char *argv[]) {
 	htt_sf->var("t_phi")->setVal(stau.getPhi());
 	htt_sf->var("t_dm")->setVal(stau.getDecayMode());
 	// trigger sf applied again here ...
+	std::cout << "Evtwt = " << evtwt << std::endl;
 	evtwt *= htt_sf->function("t_trg_mediumDeepTau_ditau_ratio")->getVal();
+	std::cout << "trigger ratio stau ==> " << htt_sf->function("t_trg_mediumDeepTau_ditau_ratio")->getVal() << " and evtwt now " << std::endl;
 	
 	// top-pT Reweighting
 	if (name == "TTT" || name == "TTJ" || name == "TTL" || name == "STT" || name == "STJ" || name == "STL") {
 	  float pt_top1 = std::min(static_cast<float>(400.), jets.getTopPt1());
 	  float pt_top2 = std::min(static_cast<float>(400.), jets.getTopPt2());
 	  if (syst == "ttbarShape_Up") {
+	    std::cout << "Evtwt = " << evtwt << std::endl;
 	    evtwt *= (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1);  // 2*√[e^(..)*e^(..)] - 1
+	    std::cout << "Top pT reweight ==> " << (2 * sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) - 1) << std::endl;
 	  } else if (syst == "ttbarShape_Up") {
 	    // no weight for shift down
 	  } else {
+	    std::cout << "Evtwt = " << evtwt << std::endl;
 	    evtwt *= sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2));  // √[e^(..)*e^(..)]
+	    std::cout << "Top pT reweight ==> " << sqrt(exp(0.0615 - 0.0005 * pt_top1) * exp(0.0615 - 0.0005 * pt_top2)) << std::endl;
 	  }
 	}
       } else if (!isData && isEmbed) {
@@ -379,22 +417,31 @@ int main(int argc, char *argv[]) {
 	if (genweight > 1 || genweight < 0) {
 	  genweight = 0;
 	}
+	std::cout << "Gen Weight ==> " << genweight << std::endl;
 	evtwt *= genweight;
 	
 	// embedded tracker correction
+	std::cout << "Evtwt = " << evtwt << std::endl;
 	evtwt *= helper->embed_tracking(ltau.getDecayMode());
+	std::cout << "Embedded tracker correction (ltau) ==> " << helper->embed_tracking(ltau.getDecayMode()) << " and evtwt now " << std::endl;
+	std::cout << "Evtwt = " << evtwt << std::endl;
 	evtwt *= helper->embed_tracking(stau.getDecayMode());
+	std::cout << "Embedded tracker correction (stau) ==> " << helper->embed_tracking(stau.getDecayMode()) << " and evtwt now " << std::endl;
 	
 	// lead tau id
 	htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
 	if (ltau.getDecayMode() == 5) {
+	  std::cout << "Evtwt = " << evtwt << std::endl;
 	  evtwt *= htt_sf->function("t_deeptauid_dm_embed_medium")->getVal();
+	  std::cout << "deeptauid_med ltau ==> " << htt_sf->function("t_deeptauid_dm_medium")->getVal() << " and evtwt now " << std::endl;
 	}
 	
 	// sublead tau id
 	htt_sf->var("t_dm")->setVal(stau.getDecayMode());
 	if (stau.getDecayMode() == 5) {
+	  std::cout << "Evtwt = " << evtwt << std::endl;
 	  evtwt *= htt_sf->function("t_deeptauid_dm_embed_medium")->getVal();
+	  std::cout << "deeptauid_med stau ==> " << htt_sf->function("t_deeptauid_dm_medium")->getVal() << " and evtwt now " << std::endl;
 	}
 	
 	// trigger scale factors
@@ -402,8 +449,11 @@ int main(int argc, char *argv[]) {
 	htt_sf->var("t_eta")->setVal(ltau.getEta());
 	htt_sf->var("t_phi")->setVal(ltau.getPhi());
 	htt_sf->var("t_dm")->setVal(ltau.getDecayMode());
-	// trigger sf applied here ...
+	// trigger sf applied here ...	
+	std::cout << "Evtwt = " << evtwt << std::endl;
 	evtwt *= htt_sf->function("t_trg_mediumDeepTau_ditau_embed_ratio")->getVal();
+	std::cout << "trigger ratio ltau ==> " << htt_sf->function("t_trg_mediumDeepTau_ditau_embed_ratio")->getVal() << " and evtwt now " << std::endl;
+
 	
 	// trigger scale factors
 	htt_sf->var("t_pt")->setVal(stau.getPt());
@@ -411,26 +461,34 @@ int main(int argc, char *argv[]) {
 	htt_sf->var("t_phi")->setVal(stau.getPhi());
 	htt_sf->var("t_dm")->setVal(stau.getDecayMode());
 	// trigger sf applied again here ...
+	std::cout << "Evtwt = " << evtwt << std::endl;
 	evtwt *= htt_sf->function("t_trg_mediumDeepTau_ditau_embed_ratio")->getVal();
+	std::cout << "trigger ratio stau ==> " << htt_sf->function("t_trg_mediumDeepTau_ditau_embed_ratio")->getVal() << " and evtwt now " << std::endl;
+
 	
 	// embedded scale factors
-	htt_sf->var("gt1_pt")->setVal(ltau.getGenPt());
-	htt_sf->var("gt1_eta")->setVal(ltau.getGenEta());
-	htt_sf->var("gt2_pt")->setVal(stau.getGenPt());
-	htt_sf->var("gt2_eta")->setVal(stau.getGenEta());
-	
+	htt_sf->var("gt1_pt")->setVal(ltau.getPt());
+	htt_sf->var("gt1_eta")->setVal(ltau.getEta());
+	htt_sf->var("gt2_pt")->setVal(stau.getPt());
+	htt_sf->var("gt2_eta")->setVal(stau.getEta());
 	// double muon trigger eff in selection
-	evtwt *= htt_sf->function("m_sel_trg_ratio")->getVal();
+	std::cout << "Evtwt = " << evtwt << std::endl;
+	evtwt *= htt_sf->function("m_sel_trg_ic_ratio")->getVal();
+	std::cout << "Muon Trigger ==> " << htt_sf->function("m_sel_trg_ic_ratio")->getVal() << " and evtwt now " << std::endl;
 	
 	// muon ID eff in selection (leg 1)
 	htt_sf->var("gt_pt")->setVal(ltau.getGenPt());
 	htt_sf->var("gt_eta")->setVal(ltau.getGenEta());
+	std::cout << "Evtwt = " << evtwt << std::endl;
 	evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+	std::cout << "Muon ID eff (leg1) ==> " << htt_sf->function("m_sel_id_ic_ratio")->getVal() << " and evtwt now " <<std::endl;
 	
 	// muon ID eff in selection (leg 2)
 	htt_sf->var("gt_pt")->setVal(stau.getGenPt());
-	htt_sf->var("gt_eta")->setVal(stau.getGenEta());
+	htt_sf->var("gt_eta")->setVal(stau.getGenEta());	
+	std::cout << "Evtwt = " << evtwt << std::endl;
 	evtwt *= htt_sf->function("m_sel_id_ic_ratio")->getVal();
+	std::cout << "Muon ID eff (leg2) ==> " << htt_sf->function("m_sel_id_ic_ratio")->getVal() << " and evtwt now " << std::endl;
       }
       
       std::vector<std::string> tree_cat;
@@ -460,6 +518,7 @@ int main(int argc, char *argv[]) {
       // Fill Trees
       // slim_tree class is used here (st is object)
       // st->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
+      std::cout << "FINAL EVENT WEIGHT ==> " << evtwt << std::endl;
       st->generalFill(tree_cat, &jets, &met, &event, evtwt, Higgs, mt, weights);
       st->fillTree(&ltau, &stau, &event, name);
     }  // close event loop
