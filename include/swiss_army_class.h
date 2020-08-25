@@ -127,7 +127,7 @@ Helper::Helper(TFile *fout, std::string name, std::string syst)
                      {"DYJetsToLL_M-50_HT-2500toInf", 0.003565 * dy_xs_corr}} {};
 
 Float_t Helper::embed_tracking(Float_t decay_mode, Int_t syst = 0) {
-    Float_t sf(.99), prong(0.975), pizero(1.051);
+    Float_t sf(1.), prong(0.975), pizero(1.051);
     Float_t dm0_syst(0.008), dm1_syst(0.016124515), dm10_syst(0.013856406), dm11_syst(0.019697716);
     if (decay_mode == 0) {
         return sf * prong + (syst * dm0_syst);

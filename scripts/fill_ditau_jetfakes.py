@@ -41,7 +41,7 @@ def create_fakes(input_name, tree_name, channel_prefix, treedict, output_dir, fa
     open_file = uproot.open('{}/{}.root'.format(input_name, sample))
     events = open_file[tree_name].arrays(['*'], outputtype=pandas.DataFrame)
     anti_events = events[(events['is_antiTauIso'] > 0)].copy()
-
+    
     anti_events['fake_weight'] = anti_events[filling_variables].apply(
         lambda x: get_weight(x, ff_weighter), axis=1).values
     # By setting the weights to zero, we are essentially "subtracting" them
@@ -91,7 +91,8 @@ def main(args):
     pool = multiprocessing.Pool(processes=n_processes)
 
     jobs = [pool.apply_async(create_fakes, (args.input, 'tt_tree', 'tt', treedict,
-                                            output_dir, fake_file, sample, args.syst)) for sample in samples]
+                                           output_dir, fake_file, sample, args.syst)) for sample in samples]
+
     a = [j.get() for j in jobs]
 
     pool.close()
